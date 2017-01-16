@@ -1,1 +1,1 @@
-# mango-php
+# MangoPHP - MongoDB PHP Models
