@@ -244,28 +244,8 @@ class Mango_Model
         return $this;
     }
 
-    public function findAll($query = array())
-    {
-        $query = array_merge(array(
-            'page'   => 1,
-            'limit'  => 10 ,
-            'sort'   => array( 'id' => 1 ) ,
-            'fields' => array( '_id' => 0 )
-        ), array_filter($query) );
-        $page   = $query['page'];
-        $limit  = $query['limit'];
-        $sort   = $query['sort'];
-        $fields = $query['fields'];
-        $offset = $limit * (max(1, $page) - 1);
-        unset($query['fields']);
-        unset($query['sort']);
-        unset($query['limit']);
-        unset($query['page']);
-        $data = $this->dbc()->find($query,$fields);
-        $data->limit($limit);
-        $data->skip($offset);
-        $data->sort($sort);
-        return (new Mango_List($data,$this));
+    public function find($query=array(),$fields=array()){
+        return new Mango_List($this->dbc()->find($query,$fields),$this);
     }
 
     public function findOne( $where = array(), $fields = array())
