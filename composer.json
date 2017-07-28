@@ -3,6 +3,7 @@
   "description": "PHP MongoDB models",
   "homepage": "http://www.kosatyi.com/",
   "license": "MIT",
+  "version":"v1.0.0",
   "authors": [
     {
       "name": "Stepan Kosatyi",
