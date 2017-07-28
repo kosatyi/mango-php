@@ -1,4 +1,4 @@
-<?
+<?php
 
 class Mango_Model
 {
