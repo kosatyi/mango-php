@@ -5,11 +5,13 @@ namespace Mango;
 class Cursor implements \Iterator
 {
     private $cursor = array();
-    private $model = array();
-    public function __construct(\MongoDB\Driver\Cursor $cursor, Model $model)
+    private $model  = array();
+    private $query  = array();
+    public function __construct(\MongoDB\Driver\Cursor $cursor, Model $model, $query = array())
     {
         $this->cursor = new \IteratorIterator($cursor);
-        $this->model = $model;
+        $this->query  = $query;
+        $this->model  = $model;
     }
     function rewind()
     {
@@ -45,9 +47,9 @@ class Cursor implements \Iterator
     {
         return $this->cursor->valid();
     }
-    function count($type = TRUE)
+    function count()
     {
-        return $this->cursor->count($type);
+        return $this->model->count($this->query);
     }
     function limit($limit = 0)
     {

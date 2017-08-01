@@ -212,8 +212,11 @@ class Model {
         }
         return $this;
     }
+    public function count($query=array()){
+        return count($this->dbc()->count($query));
+    }
     public function find($query=array(),$fields=array()){
-        return new Cursor($this->dbc()->find($query,$fields),$this);
+        return new Cursor($this->dbc()->find($query,$fields),$this,$query);
     }
     public function findOne( $where = array(), $fields = array())
     {
