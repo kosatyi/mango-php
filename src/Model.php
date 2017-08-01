@@ -41,7 +41,7 @@ class Model {
         return self::$mongo;
     }
 
-    public static function setDatabase($name)
+    public function setDatabase($name)
     {
         self::$db = $name;
     }
