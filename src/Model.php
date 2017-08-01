@@ -1,7 +1,10 @@
 <?php
 
-class Mango_Model
-{
+namespace Mango;
+
+use MongoDB\Client as Client;
+
+class Model {
 
     protected static $key;
     protected static $table;
@@ -16,24 +19,21 @@ class Mango_Model
     {
 
     }
-
     public function install()
     {
         foreach ($this::$indexes as $index) {
             $this->index($index['name'], $index['type']);
         }
     }
-
     public function index($name, $type)
     {
         $this->dbc()->createIndex($name, $type);
     }
-
     protected function connect()
     {
         if (!isset(self::$mongo)) {
             try {
-                self::$mongo = new MongoClient('mongodb:///tmp/mongodb-27017.sock');
+                self::$mongo = new Client('mongodb:///tmp/mongodb-27017.sock');
             } catch (Exception $e) {
                 die('db connection error');
             }
@@ -41,7 +41,7 @@ class Mango_Model
         return self::$mongo;
     }
 
-    public function setDatabase($name)
+    public static function setDatabase($name)
     {
         self::$db = $name;
     }
@@ -49,17 +49,15 @@ class Mango_Model
     public function db($collection = NULL)
     {
         $db = $this->connect();
-        $db = $db->selectDB($this::$db);
+        $db = $db->selectDatabase($this::$db);
         if (isset($collection))
             $db = $db->selectCollection($collection);
         return $db;
     }
-
     public function dbc()
     {
         return $this->db($this::$table);
     }
-
     public function id( $value = NULL ){
         if( is_null( $value ) ) {
             return $this->attr('id');
@@ -68,21 +66,18 @@ class Mango_Model
         }
         return $this;
     }
-
     public function instance( $data = array() )
     {
         $model = new $this;
         $model->attrs( $data );
         return $model;
     }
-
     public function attrs($data=array()){
         $data = (array) $data;
         foreach ($data as $key => $value)
             $this->attr( $key , $value);
         return $this;
     }
-
     public function attr($attr, $value = NULL)
     {
         $type = func_num_args() == 1 ? 'get' : 'set';
@@ -111,67 +106,49 @@ class Mango_Model
         if ($type == 'set') $result = $value;
         return $result;
     }
-
     public function alt($attr, $default)
     {
         return empty($attr = $this->attr($attr)) ? $default : $attr;
     }
-
-    public function model( $name )
-    {
-        $name = implode( '_' , array_map( 'ucfirst' , explode('_',$name) ) );
-        return new $name;
-    }
-
     public function hasMethod($name)
     {
         return is_string($name) ? method_exists($this, $name) : FALSE;
     }
-
     public function call( $method , $params = array() )
     {
         return $this->hasMethod($method) ? call_user_func_array(array($this, $method), $params) : FALSE;
     }
-
     public function currentTimestamp()
     {
         return (time());
     }
-
     public function beforeCreate()
     {
 
     }
-
     public function afterCreate()
     {
 
     }
-
     public function beforeUpdate()
     {
 
     }
-
     public function afterUpdate()
     {
 
     }
-
     public function beforeDelete()
     {
 
     }
-
     public function afterDelete()
     {
 
     }
-
     public function setIdField(){
         $this->id(new MongoId());
     }
-
     public function getMongoDate($value)
     {
         if (is_numeric($value))
@@ -181,45 +158,38 @@ class Mango_Model
         if ($value instanceof MongoDate)
             return $value;
     }
-
     public function setMongoDate($key, $value)
     {
         $this->attr($key, $this->getMongoDate($value));
     }
-
     public function getErrorCode()
     {
         return $this->error->getCode();
     }
-
     public function getErrorMessage()
     {
         return $this->error->getMessage();
     }
-
     public function stringToArray($value,$unique=TRUE){
         if(is_string($value)) $value = explode(',',$value);
         if($unique==TRUE) $value = array_unique($value);
         return $value;
     }
-
     public function serialize()
     {
         return $this->data;
     }
-
     public function create()
     {
         try {
             $this->beforeCreate();
-            $this->dbc()->insert($this->serialize());
+            $this->dbc()->insertOne($this->serialize());
             $this->afterCreate();
         } catch (Exception $e) {
             $this->error = $e;
         }
         return $this;
     }
-
     public function update()
     {
         try {
@@ -231,7 +201,6 @@ class Mango_Model
         }
         return $this;
     }
-
     public function delete()
     {
         try {
@@ -243,19 +212,15 @@ class Mango_Model
         }
         return $this;
     }
-
     public function find($query=array(),$fields=array()){
-        return new Mango_List($this->dbc()->find($query,$fields),$this);
+        return new Cursor($this->dbc()->find($query,$fields),$this);
     }
-
     public function findOne( $where = array(), $fields = array())
     {
         return $this->instance( $this->dbc()->findOne( $where , $fields ) );
     }
-
     public function findItem($fields = array())
     {
         return $this->findOne( array( 'id' => $this->id() ) ,$fields );
     }
-
 }
