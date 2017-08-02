@@ -2,7 +2,9 @@
 
 namespace Mango;
 
-use MongoDB\Client as Client;
+use MongoDB\Client;
+use MongoDB\BSON\ObjectID;
+use MongoDB\BSON\UTCDateTime;
 
 class Model {
 
@@ -11,6 +13,7 @@ class Model {
     protected static $mongo;
     protected static $db;
     protected static $fields = array();
+    protected static $connection = 'mongodb:///tmp/mongodb-27017.sock';
 
     protected $data = array();
     protected $error = array();
@@ -33,7 +36,7 @@ class Model {
     {
         if (!isset(self::$mongo)) {
             try {
-                self::$mongo = new Client('mongodb:///tmp/mongodb-27017.sock');
+                self::$mongo = new Client(self::$connection);
             } catch (Exception $e) {
                 die('db connection error');
             }
@@ -54,30 +57,43 @@ class Model {
             $db = $db->selectCollection($collection);
         return $db;
     }
+
     public function dbc()
     {
         return $this->db($this::$table);
     }
+
     public function id( $value = NULL ){
         if( is_null( $value ) ) {
             return $this->attr('id');
         } else {
-            $this->data['id'] = new MongoId( $value );
+            $this->attr('id', $value );
         }
         return $this;
     }
+
+    public function setId($value){
+        $this->data['id'] = new ObjectID($value);
+    }
+
+    public function getId(){
+        return $this->data['id'];
+    }
+
     public function instance( $data = array() )
     {
         $model = new $this;
         $model->attrs( $data );
         return $model;
     }
+
     public function attrs($data=array()){
         $data = (array) $data;
         foreach ($data as $key => $value)
             $this->attr( $key , $value);
         return $this;
     }
+
     public function attr($attr, $value = NULL)
     {
         $type = func_num_args() == 1 ? 'get' : 'set';
@@ -147,38 +163,45 @@ class Model {
 
     }
     public function setIdField(){
-        $this->id(new MongoId());
+        $this->id(new ObjectID());
     }
+
     public function getMongoDate($value)
     {
         if (is_numeric($value))
-            return new MongoDate($value);
+            return new UTCDateTime($value);
         if (is_string($value))
-            return new MongoDate(strtotime($value));
-        if ($value instanceof MongoDate)
+            return new UTCDateTime(strtotime($value));
+        if ($value instanceof UTCDateTime)
             return $value;
     }
+
     public function setMongoDate($key, $value)
     {
         $this->attr($key, $this->getMongoDate($value));
     }
+
     public function getErrorCode()
     {
         return $this->error->getCode();
     }
+
     public function getErrorMessage()
     {
         return $this->error->getMessage();
     }
+
     public function stringToArray($value,$unique=TRUE){
         if(is_string($value)) $value = explode(',',$value);
-        if($unique==TRUE) $value = array_unique($value);
+        if($unique==TRUE) $value = array_unique((array)$value);
         return $value;
     }
+
     public function serialize()
     {
         return $this->data;
     }
+
     public function create()
     {
         try {
@@ -194,7 +217,7 @@ class Model {
     {
         try {
             $this->beforeUpdate();
-            $this->dbc()->update(array('id' =>$this->id()),$this->serialize());
+            $this->dbc()->updateOne(array('id'=>$this->id()),array('$set'=>$this->serialize()));
             $this->afterUpdate();
         } catch (Exception $e) {
             $this->error = $e;
@@ -205,25 +228,30 @@ class Model {
     {
         try {
             $this->beforeDelete();
-            $this->dbc()->remove(array('id' => $this->id()));
+            $this->dbc()->deleteOne(array('id'=>$this->id()));
             $this->afterDelete();
         } catch (Exception $e) {
             $this->error = $e;
         }
         return $this;
     }
+
     public function count($query=array()){
-        return count($this->dbc()->count($query));
+        return $this->dbc()->count($query);
     }
-    public function find($query=array(),$fields=array()){
-        return new Cursor($this->dbc()->find($query,$fields),$this,$query);
+
+    public function find(){
+        return new Find($this);
     }
-    public function findOne( $where = array(), $fields = array())
+
+    public function findOne( $query = array(), $options = array())
     {
-        return $this->instance( $this->dbc()->findOne( $where , $fields ) );
+        return $this->instance( $this->dbc()->findOne( $query , $options ) );
     }
-    public function findItem($fields = array())
+
+    public function findItem( $options = array() )
     {
-        return $this->findOne( array( 'id' => $this->id() ) ,$fields );
+        return $this->findOne( array( 'id' => $this->id() ) , $options );
     }
+
 }
