@@ -15,7 +15,13 @@ class Model {
     protected static $db;
     protected static $fields = array();
     protected static $connection = 'mongodb:///tmp/mongodb-27017.sock';
-
+    protected static $options = array(
+        'typeMap'=> array(
+            'root' => 'array',
+            'document' => 'array',
+            'array' => 'array'
+        )
+    );
     protected $data = array();
     protected $error = array();
 
@@ -128,7 +134,8 @@ class Model {
     }
     public function alt($attr, $default)
     {
-        return empty($attr = $this->attr($attr)) ? $default : $attr;
+        $attr = $this->attr($attr);
+        return empty( $attr ) ? $default : $attr;
     }
     public function hasMethod($name)
     {
@@ -244,14 +251,18 @@ class Model {
         return new Find($this);
     }
 
+    protected function getOptions($options=array()){
+        return array_merge(self::$options,$options);
+    }
+
     public function findOne( $query = array(), $options = array())
     {
-        return $this->instance( $this->dbc()->findOne( $query , $options ) );
+        return $this->instance( $this->dbc()->findOne( $query , $this->getOptions($options) ) );
     }
 
     public function findItem( $options = array() )
     {
-        return $this->findOne( array( 'id' => $this->id() ) , $options );
+        return $this->findOne( array( 'id' => $this->id() ) , $this->getOptions($options) );
     }
 
 }
