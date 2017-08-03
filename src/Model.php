@@ -236,10 +236,6 @@ class Model {
         return $this;
     }
 
-    public function count($query=array()){
-        return $this->dbc()->count($query);
-    }
-
     public function find(){
         return new Find($this);
     }
