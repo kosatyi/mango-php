@@ -5,6 +5,7 @@ namespace Kosatyi\Mango;
 use MongoDB\Client;
 use MongoDB\BSON\ObjectID;
 use MongoDB\BSON\UTCDateTime;
+use MongoDB\BSON\Regex;
 
 class Model {
 
@@ -94,6 +95,9 @@ class Model {
         return $this;
     }
 
+    public function regex($value){
+        return new Regex($value);
+    }
     public function attr($attr, $value = NULL)
     {
         $type = func_num_args() == 1 ? 'get' : 'set';
