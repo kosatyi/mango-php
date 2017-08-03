@@ -1,6 +1,6 @@
 <?php
 
-namespace Mango;
+namespace Kosatyi\Mango;
 
 use \IteratorIterator;
 use \Iterator;

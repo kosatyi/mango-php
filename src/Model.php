@@ -1,6 +1,6 @@
 <?php
 
-namespace Mango;
+namespace Kosatyi\Mango;
 
 use MongoDB\Client;
 use MongoDB\BSON\ObjectID;

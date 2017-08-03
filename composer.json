@@ -3,7 +3,7 @@
   "description": "PHP MongoDB Models",
   "homepage": "https://kosatyi.com/",
   "license": "MIT",
-  "version":"v1.0.1",
+  "version":"v1.0.2",
   "authors": [
     {
       "name": "Stepan Kosatyi",
@@ -16,6 +16,6 @@
       "mongodb/mongodb": "^1.1"
   },
   "autoload": {
-    "psr-4": { "Mango\\": "src/" }
+    "psr-4": { "Kosatyi\\Mango\\": "src/" }
   }
 }
