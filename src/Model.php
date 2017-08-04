@@ -10,11 +10,19 @@ use MongoDB\BSON\Regex;
 class Model {
 
     protected static $key;
+
     protected static $table;
+
     protected static $mongo;
+
     protected static $db;
-    protected static $fields = array();
+
+    protected static $fields  = array();
+
+    protected static $indexes = array();
+
     protected static $connection = 'mongodb:///tmp/mongodb-27017.sock';
+
     protected static $options = array(
         'typeMap'=> array(
             'root' => 'array',
@@ -22,6 +30,7 @@ class Model {
             'array' => 'array'
         )
     );
+
     protected $data = array();
     protected $error = array();
 
@@ -29,16 +38,49 @@ class Model {
     {
 
     }
+
+    public function setDatabase($name)
+    {
+        self::$db = $name;
+    }
+
+    public function setConnection($connection)
+    {
+        self::$connection = $connection;
+    }
+
+
+    public function objectid($value=null){
+        if($value instanceof ObjectID) return $value;
+        if(is_string($value)) $value = new ObjectID($value);
+        return $value;
+    }
+
+    public function regex($value,$flags=''){
+        if($value instanceof Regex) return $value;
+        if(is_string($value)) $value = new Regex($value,$flags);
+        return $value;
+    }
+
+    public function utcdatetime($value=null){
+        if($value instanceof UTCDateTime) return $value;
+        if(is_numeric($value)) $value =  new UTCDateTime($value);
+        if(is_string($value)) $value = new UTCDateTime(strtotime($value));
+        return $value;
+    }
+
     public function install()
     {
         foreach ($this::$indexes as $index) {
             $this->index($index['name'], $index['type']);
         }
     }
+
     public function index($name, $type)
     {
         $this->dbc()->createIndex($name, $type);
     }
+
     protected function connect()
     {
         if (!isset(self::$mongo)) {
@@ -51,10 +93,6 @@ class Model {
         return self::$mongo;
     }
 
-    public function setDatabase($name)
-    {
-        self::$db = $name;
-    }
 
     public function db($collection = NULL)
     {
@@ -80,14 +118,14 @@ class Model {
     }
 
     public function setId($value){
-        $this->data['id'] = new ObjectID($value);
+        $this->data['id'] = $this->objectid($value);
     }
 
     public function getId(){
         return $this->data['id'];
     }
 
-    public function instance( $data = array() )
+    public function instance($data=array())
     {
         $model = new $this;
         $model->attrs( $data );
@@ -95,15 +133,12 @@ class Model {
     }
 
     public function attrs($data=array()){
-        $data = (array) $data;
+        $data = (array)$data;
         foreach ($data as $key => $value)
-            $this->attr( $key , $value);
+            $this->attr($key,$value);
         return $this;
     }
 
-    public function regex($value){
-        return new Regex($value);
-    }
     public function attr($attr, $value = NULL)
     {
         $type = func_num_args() == 1 ? 'get' : 'set';
@@ -132,64 +167,39 @@ class Model {
         if ($type == 'set') $result = $value;
         return $result;
     }
+
     public function alt($attr, $default)
     {
         $attr = $this->attr($attr);
         return empty( $attr ) ? $default : $attr;
     }
+
     public function hasMethod($name)
     {
         return is_string($name) ? method_exists($this, $name) : FALSE;
     }
+
     public function call( $method , $params = array() )
     {
         return $this->hasMethod($method) ? call_user_func_array(array($this, $method), $params) : FALSE;
     }
+
     public function currentTimestamp()
     {
         return (time());
     }
-    public function beforeCreate()
-    {
 
-    }
-    public function afterCreate()
-    {
-
-    }
-    public function beforeUpdate()
-    {
-
-    }
-    public function afterUpdate()
-    {
-
-    }
-    public function beforeDelete()
-    {
-
-    }
-    public function afterDelete()
-    {
-
-    }
     public function setIdField(){
-        $this->id(new ObjectID());
+        $this->id($this->objectid());
     }
-
     public function getMongoDate($value)
     {
-        if (is_numeric($value))
-            return new UTCDateTime($value);
-        if (is_string($value))
-            return new UTCDateTime(strtotime($value));
-        if ($value instanceof UTCDateTime)
-            return $value;
+        return $this->utcdatetime($value);
     }
 
-    public function setMongoDate($key, $value)
+    public function setMongoDate($key,$value)
     {
-        $this->attr($key, $this->getMongoDate($value));
+        $this->attr($key,$this->getMongoDate($value));
     }
 
     public function getErrorCode()
@@ -263,6 +273,32 @@ class Model {
     public function findItem( $options = array() )
     {
         return $this->findOne( array( 'id' => $this->id() ) , $this->getOptions($options) );
+    }
+
+
+    public function beforeCreate()
+    {
+
+    }
+    public function afterCreate()
+    {
+
+    }
+    public function beforeUpdate()
+    {
+
+    }
+    public function afterUpdate()
+    {
+
+    }
+    public function beforeDelete()
+    {
+
+    }
+    public function afterDelete()
+    {
+
     }
 
 }
