@@ -275,27 +275,31 @@ class Model {
         return $this->findOne( array( 'id' => $this->id() ) , $this->getOptions($options) );
     }
 
-
     public function beforeCreate()
     {
 
     }
+
     public function afterCreate()
     {
 
     }
+
     public function beforeUpdate()
     {
 
     }
+
     public function afterUpdate()
     {
 
     }
+
     public function beforeDelete()
     {
 
     }
+
     public function afterDelete()
     {
 
