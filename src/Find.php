@@ -9,13 +9,9 @@ class Find implements Iterator
 {
 
     private $model;
-
     private $cursor  = array();
-
     private $query   = array();
-
     private $params  = array();
-
     private $typeMap = array(
         'root' => 'array',
         'document' => 'array',

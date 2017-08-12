@@ -9,13 +9,13 @@ use MongoDB\BSON\Regex;
 
 class Model {
 
-    protected static $key;
-
-    protected static $table;
+    protected static $id = 'id';
 
     protected static $mongo;
 
     protected static $db;
+
+    protected static $table;
 
     protected static $fields  = array();
 
@@ -31,7 +31,8 @@ class Model {
         )
     );
 
-    protected $data = array();
+    protected $data  = array();
+
     protected $error = array();
 
     public function __construct()
@@ -53,6 +54,7 @@ class Model {
     public function objectid($value=null){
         if($value instanceof ObjectID) return $value;
         if(is_string($value)) $value = new ObjectID($value);
+        else $value = new ObjectID();
         return $value;
     }
 
@@ -110,19 +112,19 @@ class Model {
 
     public function id( $value = NULL ){
         if( is_null( $value ) ) {
-            return $this->attr('id');
+            return $this->attr($this::$id);
         } else {
-            $this->attr('id', $value );
+            $this->attr($this::$id,$value);
         }
         return $this;
     }
 
     public function setId($value){
-        $this->data['id'] = $this->objectid($value);
+        $this->data[$this::$id] = $this->objectid($value);
     }
 
     public function getId(){
-        return $this->data['id'];
+        return $this->data[$this::$id];
     }
 
     public function instance($data=array())
@@ -238,7 +240,7 @@ class Model {
     {
         try {
             $this->beforeUpdate();
-            $this->dbc()->updateOne(array('id'=>$this->id()),array('$set'=>$this->serialize()));
+            $this->dbc()->updateOne(array($this::$id=>$this->id()),array('$set'=>$this->serialize()));
             $this->afterUpdate();
         } catch (Exception $e) {
             $this->error = $e;
@@ -249,7 +251,7 @@ class Model {
     {
         try {
             $this->beforeDelete();
-            $this->dbc()->deleteOne(array('id'=>$this->id()));
+            $this->dbc()->deleteOne(array($this::$id=>$this->id()));
             $this->afterDelete();
         } catch (Exception $e) {
             $this->error = $e;
@@ -272,12 +274,12 @@ class Model {
 
     public function findItem( $options = array() )
     {
-        return $this->findOne( array( 'id' => $this->id() ) , $this->getOptions($options) );
+        return $this->findOne( array( $this::$id => $this->id() ) , $this->getOptions($options) );
     }
 
     public function beforeCreate()
     {
-
+        $this->setIdField();
     }
 
     public function afterCreate()
