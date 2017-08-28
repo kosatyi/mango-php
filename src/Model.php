@@ -6,6 +6,7 @@ use MongoDB\Client;
 use MongoDB\BSON\ObjectID;
 use MongoDB\BSON\UTCDateTime;
 use MongoDB\BSON\Regex;
+use MongoDB\GridFS\Bucket;
 
 class Model {
 
@@ -16,8 +17,6 @@ class Model {
     protected static $db;
 
     protected static $table;
-
-    protected static $fields  = array();
 
     protected static $indexes = array();
 
@@ -125,6 +124,12 @@ class Model {
 
     public function getId(){
         return $this->data[$this::$id];
+    }
+
+    public function fs(){
+
+        return new Bucket($this->dbc()->getManager() , $this::$db );
+
     }
 
     public function instance($data=array())
