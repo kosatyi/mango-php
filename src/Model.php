@@ -236,7 +236,7 @@ class Model {
             $this->beforeCreate();
             $this->dbc()->insertOne($this->serialize());
             $this->afterCreate();
-        } catch (Exception $e) {
+        } catch (\Exception $e) {
             $this->error = $e;
         }
         return $this;
@@ -247,7 +247,7 @@ class Model {
             $this->beforeUpdate();
             $this->dbc()->updateOne(array($this::$id=>$this->id()),array('$set'=>$this->serialize()));
             $this->afterUpdate();
-        } catch (Exception $e) {
+        } catch (\Exception $e) {
             $this->error = $e;
         }
         return $this;
@@ -258,7 +258,7 @@ class Model {
             $this->beforeDelete();
             $this->dbc()->deleteOne(array($this::$id=>$this->id()));
             $this->afterDelete();
-        } catch (Exception $e) {
+        } catch (\Exception $e) {
             $this->error = $e;
         }
         return $this;
