@@ -67,11 +67,8 @@ class User extends Kosatyi\Mango\Model
 $user = new User();
 
 $user->install();
-
-$user->attr('name', 'Uazmi News');
-
-$user->attr('email', 'contacts@uazmi.org');
-
+$user->attr('name', 'Test User');
+$user->attr('email', 'test@example.com');
 $user->create();
 
 $list = $user->getList([], 1, 2);
