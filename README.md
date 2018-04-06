@@ -42,7 +42,7 @@ Or add dependency manually in `composer.json`
 ```json
 {
   "require": {
-    "kosatyi/mango-php":"^1.0"
+    "kosatyi/mango-php":"^0.0.1"
   }
 }
 
