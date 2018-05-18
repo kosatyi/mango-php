@@ -209,7 +209,7 @@ class Model implements \JsonSerializable, \Serializable
     public function id($value = NULL)
     {
         if (is_null($value)) {
-            return (string)$this->prop($this::$id);
+            return $this->prop($this::$id);
         } else {
             $this->prop($this::$id, $this->objectId($value));
         }
