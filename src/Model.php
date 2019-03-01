@@ -8,6 +8,8 @@ use MongoDB\BSON\UTCDateTime;
 use MongoDB\BSON\Regex;
 use MongoDB\GridFS\Bucket;
 
+use \ReflectionClass;
+
 /**
  * Class Model
  * @package Kosatyi\Mango
@@ -59,17 +61,14 @@ class Model implements \JsonSerializable, \Serializable
             'array' => 'array'
         ]
     ];
-
     /**
      * @var array
      */
     protected $data = [];
-
     /**
      * @var null
      */
     protected $error = null;
-
     /**
      * Model constructor.
      */
@@ -87,6 +86,7 @@ class Model implements \JsonSerializable, \Serializable
     {
         self::$db = $name;
     }
+
     /**
      * @param $connection
      */
@@ -94,6 +94,7 @@ class Model implements \JsonSerializable, \Serializable
     {
         $this::$connection = $connection;
     }
+
     /**
      * @return string
      */
@@ -226,18 +227,16 @@ class Model implements \JsonSerializable, \Serializable
 
     /**
      * @param array $data
-     * @return mixed
+     * @return $this
      */
     public function instance($data = array())
     {
-        $model = new $this;
-        $model->attrs($data);
-        return $model;
+        return (new $this)->attrs($data);
     }
 
     /**
      * @param $path
-     * @return array|mixed|strlen
+     * @return array|mixed
      */
     protected function getKeyParts($path)
     {
@@ -271,8 +270,9 @@ class Model implements \JsonSerializable, \Serializable
      */
     public function attr($attr, $value = null)
     {
+        $get  = is_null($value);
         $keys = $this->getKeyParts($attr);
-        $method = $this->getMethodName(is_null($value) ? 'get' : 'set', $keys);
+        $method = $this->getMethodName($get ? 'get' : 'set', $keys);
         if (method_exists($this, $method)) {
             return call_user_func_array([$this, $method], [$value]);
         }
@@ -286,9 +286,9 @@ class Model implements \JsonSerializable, \Serializable
      */
     public function prop($keys, $value = null)
     {
+        $get  = is_null($value);
         $keys = $this->getKeyParts($keys);
         $prop = array_shift($keys);
-        $get = is_null($value);
         if (array_key_exists($prop, $this->data)) {
             if ($get) {
                 $copy = $this->data[$prop];
@@ -312,11 +312,16 @@ class Model implements \JsonSerializable, \Serializable
                 $copy =& $copy[$key];
             }
         }
-        if ($get) {
-            return $copy;
+        if ( $get ) {
+            if (is_callable($copy)) {
+                $result = $copy->bindTo($this)();
+            } else {
+                $result = $copy;
+            }
+            return $result;
         }
         if (is_callable($copy)) {
-            $copy($value);
+            $copy->bindTo($this)($value);
         } else {
             $copy = $value;
         }
@@ -334,7 +339,6 @@ class Model implements \JsonSerializable, \Serializable
             $this->attr($key, $value);
         return $this;
     }
-
     /**
      * @param $attr
      * @param $default
@@ -345,7 +349,6 @@ class Model implements \JsonSerializable, \Serializable
         $attr = $this->attr($attr);
         return empty($attr) ? $default : $attr;
     }
-
     /**
      * @param $name
      * @return bool
@@ -354,7 +357,6 @@ class Model implements \JsonSerializable, \Serializable
     {
         return is_string($name) ? method_exists($this, $name) : FALSE;
     }
-
     /**
      * @param $method
      * @param array $params
@@ -373,10 +375,20 @@ class Model implements \JsonSerializable, \Serializable
         return (time());
     }
 
+    /**
+     * @return false|string
+     */
+    public function currentDate()
+    {
+        return (date('Y-m-d'));
+    }
 
+    /**
+     *
+     */
     public function setIdField()
     {
-        if (empty($this->id())) {
+        if ($this->id() == null) {
             $this->id($this->objectId());
         }
     }
@@ -412,12 +424,23 @@ class Model implements \JsonSerializable, \Serializable
     }
 
     /**
-     * @return null
+     * @return \Exception
      */
     public function getError()
     {
         return $this->error;
     }
+
+    public function clearError()
+    {
+        $this->error = null;
+    }
+
+    public function hasError()
+    {
+        return !empty($this->error);
+    }
+
 
     /**
      * @return array
@@ -425,22 +448,6 @@ class Model implements \JsonSerializable, \Serializable
     public function data()
     {
         return $this->data;
-    }
-
-    /**
-     * @return $this
-     */
-    public function create()
-    {
-        try {
-            $this->setIdField();
-            $this->beforeCreate();
-            $this->dbc()->insertOne($this->data());
-            $this->afterCreate();
-        } catch (\Exception $e) {
-            $this->error = $e;
-        }
-        return $this;
     }
 
     /**
@@ -454,9 +461,27 @@ class Model implements \JsonSerializable, \Serializable
     /**
      * @return $this
      */
+    public function create()
+    {
+        try {
+            $this->clearError();
+            $this->setIdField();
+            $this->beforeCreate();
+            $this->dbc()->insertOne($this->data());
+            $this->afterCreate();
+        } catch (\Exception $e) {
+            $this->error = $e;
+        }
+        return $this;
+    }
+
+    /**
+     * @return $this
+     */
     public function update()
     {
         try {
+            $this->clearError();
             $this->beforeUpdate();
             $this->dbc()->updateOne($this->queryId(), ['$set' => $this->data()]);
             $this->afterUpdate();
@@ -472,6 +497,7 @@ class Model implements \JsonSerializable, \Serializable
     public function delete()
     {
         try {
+            $this->clearError();
             $this->beforeDelete();
             $this->dbc()->deleteOne($this->queryId());
             $this->afterDelete();
@@ -496,7 +522,7 @@ class Model implements \JsonSerializable, \Serializable
      */
     public function count($query = array(), $options = array())
     {
-        return $this->dbc()->count($query, $this->getOptions($options));
+        return $this->dbc()->countDocuments($query, $this->getOptions($options));
     }
 
     /**
@@ -511,7 +537,7 @@ class Model implements \JsonSerializable, \Serializable
     /**
      * @param array $query
      * @param array $options
-     * @return mixed
+     * @return $this
      */
     public function findOne($query = array(), $options = array())
     {
@@ -520,7 +546,7 @@ class Model implements \JsonSerializable, \Serializable
 
     /**
      * @param array $options
-     * @return mixed
+     * @return $this
      */
     public function findItem($options = array())
     {

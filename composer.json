@@ -10,8 +10,9 @@
     }
   ],
   "require": {
-      "php": ">=5.4",
+      "php": ">=5.5",
       "ext-mongodb": "^1.2.0",
+      "ext-ctype": "*",
       "mongodb/mongodb": "^1.1"
   },
   "autoload": {
