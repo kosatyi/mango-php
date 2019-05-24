@@ -1,14 +1,6 @@
-<h1 align="center">
-  <a href="https://kosatyi.com">
-      <img src="https://i.imgur.com/0ggpWvt.png" alt="MongoDB Logo" width="456" height="250"></a>
-  <br>
-  Mango-PHP
-  <br>
-</h1>
+# Mango-PHP
 
-<h4 align="center">
-MongoDB Models 
-</h4>
+MongoDB Models implementation 
 
 <p align="center">
 <a href="https://packagist.org/packages/kosatyi/mango-php"><img src="https://poser.pugx.org/kosatyi/mango-php/version" /></a>
