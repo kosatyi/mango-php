@@ -19,7 +19,8 @@ navigation: false
 
 projects: true
 
-title: Mango-PHP
+brand: mango-php
+title: Mango PHP
 description: MongoDB Models
 logo: https://i.imgur.com/0ggpWvt.png
 
