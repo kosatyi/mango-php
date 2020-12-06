@@ -93,7 +93,7 @@ class Find implements Iterator
 
     public function offset($offset)
     {
-        $this->params['offset'] = $offset;
+        $this->params['skip'] = $offset;
         return $this;
     }
 

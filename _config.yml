@@ -1,32 +1,19 @@
-plugins:
-  - jekyll-seo-tag
-
-port: 4001
-
-styles:
-
 remote_theme: kosatyi/sjt
 
-exclude:
-  - vendor
-  - src
-
-javascript:
+navigation: false
+projects: true
 
 baseurl: /mango-php
-
-navigation: false
-
-projects: true
 
 brand: mango-php
 title: Mango PHP
 description: MongoDB Models
+<<<<<<< HEAD
 logo: https://i.imgur.com/0ggpWvt.png
 analytics: UA-37629144-1
+=======
+>>>>>>> 099080b3f3a7d39a08260158d8946a15e2288247
 
 author:
   name: Stepan Kosatyi
-  url: http://www.kosatyi.com/
-
-toolbar:
+  url: https://kosatyi.com/

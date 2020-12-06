@@ -143,8 +143,8 @@ class Model implements \JsonSerializable, \Serializable
     public function utcDateTime($value = null)
     {
         if ($value instanceof UTCDateTime) return $value;
-        if (is_numeric($value)) $value = new UTCDateTime($value);
-        if (is_string($value)) $value = new UTCDateTime(strtotime($value));
+        if (is_string($value)) $value = strtotime($value);
+        $value = new UTCDateTime($value * 1000);
         return $value;
     }
 
