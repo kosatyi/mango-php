@@ -8,11 +8,9 @@ baseurl: /mango-php
 brand: mango-php
 title: Mango PHP
 description: MongoDB Models
-<<<<<<< HEAD
 logo: https://i.imgur.com/0ggpWvt.png
 analytics: UA-37629144-1
-=======
->>>>>>> 099080b3f3a7d39a08260158d8946a15e2288247
+
 
 author:
   name: Stepan Kosatyi
